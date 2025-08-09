@@ -1,12 +1,30 @@
 #[allow(unused_imports)]
 use std::io::{self, Write};
+mod tokenizer;
+use tokenizer::tokenizer;
 
 fn main() {
-    // Uncomment this block to pass the first stage
-    print!("$ ");
-    io::stdout().flush().unwrap();
+    loop {
+        print!("$ ");
+        io::stdout().flush().unwrap();
 
-    // Wait for user input
-    let mut input = String::new();
-    io::stdin().read_line(&mut input).unwrap();
+        let mut input = String::new();
+        let bytes = io::stdin().read_line(&mut input).unwrap();
+
+        if bytes == 0 {
+            println!("\nExiting shell.");
+            break;
+        }
+
+        let input = input.trim();
+
+        if input == "exit" {
+            break;
+        }
+
+        match tokenizer(input) {
+            Ok(tokens) => println!("{:?}", tokens),
+            Err(e) => eprintln!("Tokenizer error: {}", e),
+        }
+    }
 }
