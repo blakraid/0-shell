@@ -1,7 +1,7 @@
 #[allow(unused_imports)]
 use std::io::{self, Write};
-mod tokenizer;
-use tokenizer::tokenizer;
+mod modules;
+use modules::tokenizer::tokenizer;
 
 fn main() {
     loop {
