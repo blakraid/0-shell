@@ -1,7 +1,8 @@
 #[allow(unused_imports)]
 use std::io::{self, Write};
 mod modules;
-use modules::tokenizer::tokenizer;
+use modules::tokenizer::*;
+use modules::prossess::*;
 
 fn main() {
     loop {
@@ -9,22 +10,28 @@ fn main() {
         io::stdout().flush().unwrap();
 
         let mut input = String::new();
-        let bytes = io::stdin().read_line(&mut input).unwrap();
-
-        if bytes == 0 {
-            println!("\nExiting shell.");
-            break;
-        }
+        let _bytes = io::stdin().read_line(&mut input).unwrap();
 
         let input = input.trim();
 
-        if input == "exit" {
-            break;
-        }
-
-        match tokenizer(input) {
-            Ok(tokens) => println!("{:?}", tokens),
-            Err(e) => eprintln!("Tokenizer error: {}", e),
-        }
+        let tokens = match tokenizer(input) {
+            Ok(tokens) => tokens,
+            Err(e) => {
+                println!("Error: {}", e);
+                continue;
+            }
+                
+        };
+        
+       match prossess(tokens) {
+        Ok(v) => {
+            if v.as_str() == "exit" {
+                break;
+            }else{
+                println!("{}",v)
+            }
+        },
+        Err(e) => println!("{}",e),
+       }
     }
 }
