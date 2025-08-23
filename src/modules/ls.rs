@@ -28,6 +28,9 @@ pub fn ls(arr : &[String]) -> Result<String,String>{
                     return Err("ls: invalid option".to_string());
                 }
             }
+            if !tag_a && !tag_f && !tag_l{
+                return Err("ls: cannot access '-': No such file or directory".to_string());
+            }
         }else {
             vars.push(op.clone());
         }
@@ -108,6 +111,9 @@ pub fn ls(arr : &[String]) -> Result<String,String>{
             Err(_) => { return Err(format!("ls: cannot access '{}'", var));}
         }
     }
+//     result.sort_by_key(|line| {
+//     line.split_whitespace().last().unwrap_or("").to_string()
+// });
     let elem = format!("total {}",number_files);
     result.insert(0, elem);
     let output = result.join("\n");
