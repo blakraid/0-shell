@@ -18,5 +18,6 @@ pub fn prossess(value : Vec<String>) -> Result<String,String>{
         "mkdir" => Ok("exit".to_string()),*/
         "exit" => Ok("exit".to_string()),
         _ => Err("Write a valid Command".to_string())
-        }
     }
+}
+
