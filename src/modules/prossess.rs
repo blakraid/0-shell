@@ -1,4 +1,6 @@
 use crate::modules::cat::cat;
+use crate::modules::cp::cp;
+use crate::modules::echo::echo;
 use crate::modules::ls::ls;
 use crate::modules::mkdir::mkdir;
 use crate::modules::pwd::pwd;
@@ -20,6 +22,14 @@ pub fn prossess(value: Vec<String>) -> Result<String, String> {
             Err(e) => Err(e),
         },
         "cat" => match cat(&value[1..]) {
+            Ok(s) => Ok(s),
+            Err(e) => Err(e),
+        },
+        "cp" => match cp(&value[1..]) {
+            Ok(s) => Ok(s),
+            Err(e) => Err(e),
+        },
+        "echo" => match echo(&value[1..]) {
             Ok(s) => Ok(s),
             Err(e) => Err(e),
         },
