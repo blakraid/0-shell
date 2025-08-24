@@ -1,5 +1,7 @@
+use crate::modules::cat::cat;
 use crate::modules::ls::ls;
 use crate::modules::mkdir::mkdir;
+use crate::modules::pwd::pwd;
 // use libc::mkdir;
 
 pub fn prossess(value: Vec<String>) -> Result<String, String> {
@@ -10,6 +12,14 @@ pub fn prossess(value: Vec<String>) -> Result<String, String> {
             Err(e) => Err(e),
         },
         "mkdir" => match mkdir(&value[1..]) {
+            Ok(s) => Ok(s),
+            Err(e) => Err(e),
+        },
+        "pwd" => match pwd(&value[1..]) {
+            Ok(s) => Ok(s),
+            Err(e) => Err(e),
+        },
+        "cat" => match cat(&value[1..]) {
             Ok(s) => Ok(s),
             Err(e) => Err(e),
         },
