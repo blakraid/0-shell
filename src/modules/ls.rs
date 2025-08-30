@@ -5,7 +5,8 @@ use {
     std::ffi::CStr,
     std::time::{SystemTime},
     chrono::{DateTime, Local},
-
+    std::env,
+    std::path::PathBuf,
 };
 
 pub fn ls(arr : &[String]) -> Result<String,String>{
@@ -32,19 +33,33 @@ pub fn ls(arr : &[String]) -> Result<String,String>{
                 return Err("ls: cannot access '-': No such file or directory".to_string());
             }
         }else {
-            vars.push(op.clone());
+            vars.push(fix_path(op));
         }
     }
     if vars.is_empty(){
         vars.push(".".to_string());
     }
     let mut result: Vec<String> = Vec::new();
-    for var in vars{
+    let mut ne_line = false;
+    vars.sort();
+    for var in &vars{
+        if vars.len() != 1 {
+            if ne_line {
+                result.push(format!("\n{}:",fix_path(&var)));
+            }else{
+                result.push(format!("{}:",fix_path(&var)));
+            }
+            ne_line = true;
+        }
         match fs::read_dir(&var){
             Ok(files) => {
-                for file in files{
-                    match file {
-                        Ok(read_file) => {
+                let mut entries: Vec<_> = files.filter_map(|e| e.ok()).collect();
+                entries.sort_by(|a, b| {
+                        let a_name = a.file_name().to_string_lossy().trim_matches('.').to_lowercase();
+                        let b_name = b.file_name().to_string_lossy().trim_matches('.').to_lowercase();
+                        a_name.cmp(&b_name)
+                });
+                for read_file in entries{
                             let path = read_file.path();
                             let name_file = match path.file_name() {
                                 Some(v) => v.to_string_lossy().to_string(),
@@ -52,6 +67,15 @@ pub fn ls(arr : &[String]) -> Result<String,String>{
                             };
                             if !tag_a && name_file.starts_with('.'){
                                 continue;
+                            };
+
+                            if tag_a {
+                                for special in [".", ".."] {
+                                    if let Ok(meta) = fs::symlink_metadata(special) {
+                                        number_files += meta.blocks(); // include in total
+                                        all_entries.push((PathBuf::from(special), meta));
+                                    }
+                                }
                             };
 
                             match fs::symlink_metadata(path){
@@ -102,18 +126,12 @@ pub fn ls(arr : &[String]) -> Result<String,String>{
                                 },
                                 Err(_) => continue
                             };
-                            
-                        },
-                        Err(_) => continue
-                    }
                 }
+
             },
             Err(_) => { return Err(format!("ls: cannot access '{}'", var));}
         }
     }
-//     result.sort_by_key(|line| {
-//     line.split_whitespace().last().unwrap_or("").to_string()
-// });
     let elem = format!("total {}",number_files);
     result.insert(0, elem);
     let output = result.join("\n");
@@ -142,4 +160,19 @@ fn get_gid_name(gid: u32) -> String {
         let name = CStr::from_ptr((*gr).gr_name);
         name.to_string_lossy().into_owned()
     }
+}
+
+
+fn fix_path(path: &str) -> String {
+    if path.starts_with("~") {
+        if path == "~" {
+            return env::var("HOME").unwrap_or(".".to_string());
+        } else if path.starts_with("~/") {
+            let home = env::var("HOME").unwrap_or(".".to_string());
+            let mut expanded = PathBuf::from(home);
+            expanded.push(&path[2..]);
+            return expanded.to_string_lossy().into_owned();
+        }
+    }
+    path.to_string()
 }
