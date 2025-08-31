@@ -45,7 +45,7 @@ pub fn ls(arr : &[String]) -> Result<String,String>{
     for var in &vars{
         if vars.len() != 1 {
             if ne_line {
-                result.push(format!("\n{}:",fix_path(&var)));
+                result.push(format!("{}:",fix_path(&var)));
             }else{
                 result.push(format!("{}:",fix_path(&var)));
             }
@@ -59,6 +59,7 @@ pub fn ls(arr : &[String]) -> Result<String,String>{
                         let b_name = b.file_name().to_string_lossy().trim_matches('.').to_lowercase();
                         a_name.cmp(&b_name)
                 });
+                let mut push_result: String = String::new();
                 for read_file in entries{
                             let path = read_file.path();
                             let name_file = match path.file_name() {
@@ -68,16 +69,7 @@ pub fn ls(arr : &[String]) -> Result<String,String>{
                             if !tag_a && name_file.starts_with('.'){
                                 continue;
                             };
-
-                            if tag_a {
-                                for special in [".", ".."] {
-                                    if let Ok(meta) = fs::symlink_metadata(special) {
-                                        number_files += meta.blocks(); // include in total
-                                        all_entries.push((PathBuf::from(special), meta));
-                                    }
-                                }
-                            };
-
+                            
                             match fs::symlink_metadata(path){
                                 Ok(v) => {
                                     let mut name_display = name_file.clone();
@@ -116,8 +108,8 @@ pub fn ls(arr : &[String]) -> Result<String,String>{
                                         let mtime: DateTime<Local> = DateTime::from(SystemTime::UNIX_EPOCH + std::time::Duration::from_secs(v.mtime() as u64));
                                         let time_str = mtime.format("%b %e %H:%M").to_string();
 
-                                        result.push(format!(
-                                            "{} {:>3} {:>5} {:>5} {:>8} {} {}",
+                                        push_result.push_str(&format!(
+                                            "{} {:>3} {:>5} {:>5} {:>8} {} {}\n",
                                             perms, nlink, get_uid, get_git, size, time_str, name_display
                                         ));
                                     }else {
@@ -127,14 +119,14 @@ pub fn ls(arr : &[String]) -> Result<String,String>{
                                 Err(_) => continue
                             };
                 }
+                result.push(format!("total {}\n{}",number_files/2,push_result));
+                number_files = 0;
 
             },
             Err(_) => { return Err(format!("ls: cannot access '{}'", var));}
         }
     }
-    let elem = format!("total {}",number_files);
-    result.insert(0, elem);
-    let output = result.join("\n");
+    let output = result.join("\n").trim_matches('\n').to_string();
     Ok(output)
 }
 
