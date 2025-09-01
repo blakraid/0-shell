@@ -6,12 +6,10 @@ pub fn mkdir(args: &[String]) -> Result<String, String> {
     }
 
     let mut errors = Vec::new();
-    let mut success_count = 0;
 
     for dir_name in args {
         match fs::create_dir(dir_name) {
             Ok(_) => {
-                success_count += 1;
             }
             Err(e) => {
                 let error_msg = match e.kind() {
@@ -41,9 +39,7 @@ pub fn mkdir(args: &[String]) -> Result<String, String> {
 
     if errors.is_empty() {
         Ok(String::new())
-    } else if success_count > 0 {
-        Err(errors.join("\n"))
-    } else {
+    }  else {
         Err(errors.join("\n"))
     }
 }

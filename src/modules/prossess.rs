@@ -10,7 +10,7 @@ use {
     crate::modules::mv::mv,
 };
 
-pub fn prossess(value: Vec<String>) -> Result<String, String> {
+pub fn prossess(value: Vec<String>, input: &str) -> Result<String, String> {
     let cmd = value[0].clone();
     match cmd.as_str() {
         "ls" => match ls(&value[1..]) {
@@ -45,9 +45,12 @@ pub fn prossess(value: Vec<String>) -> Result<String, String> {
             Ok(s) => Ok(s),
             Err(e) => Err(e),
         },
-        "echo" => match echo(&value[1..]) {
-            Ok(s) => Ok(s),
-            Err(e) => Err(e),
+        "echo" => {
+            let prcss = input.strip_prefix("echo").unwrap_or("").trim_start();
+            match echo(prcss) {
+                Ok(s) => Ok(s),
+                Err(e) => Err(e),
+            }
         },
         "exit" => Ok("exit".to_string()),
         _ => Err(format!("Command '{}' not found",cmd)),
