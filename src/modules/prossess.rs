@@ -1,17 +1,31 @@
-use crate::modules::cat::cat;
-use crate::modules::cp::cp;
-use crate::modules::echo::echo;
-use crate::modules::ls::ls;
-use crate::modules::mkdir::mkdir;
-use crate::modules::pwd::pwd;
-use crate::modules::rm::rm;
-use crate::modules::cd::cd;
-use crate::modules::mv::mv;
+use {
+    crate::modules::cat::cat,
+    crate::modules::cp::cp,
+    crate::modules::echo::echo,
+    crate::modules::ls::ls,
+    crate::modules::mkdir::mkdir,
+    crate::modules::pwd::pwd,
+    crate::modules::rm::rm,
+    crate::modules::cd::cd,
+    crate::modules::mv::mv,
+};
 
 pub fn prossess(value: Vec<String>) -> Result<String, String> {
     let cmd = value[0].clone();
     match cmd.as_str() {
         "ls" => match ls(&value[1..]) {
+            Ok(s) => Ok(s),
+            Err(e) => Err(e),
+        },
+        "rm" => match rm(&value[1..]) {
+            Ok(s) => Ok(s),
+            Err(e) => Err(e),
+        },
+        "cd" => match cd(&value[1..]) {
+            Ok(s) => Ok(s),
+            Err(e) => Err(e),
+        },
+        "mv" => match mv(&value[1..]) {
             Ok(s) => Ok(s),
             Err(e) => Err(e),
         },
@@ -35,20 +49,7 @@ pub fn prossess(value: Vec<String>) -> Result<String, String> {
             Ok(s) => Ok(s),
             Err(e) => Err(e),
         },
-        "rm" => match rm(&value[1..]) {
-            Ok(s) => Ok(s),
-            Err(e) => Err(e),
-        },
-        "cd" => match cd(&value[1..]) {
-            Ok(s) => Ok(s),
-            Err(e) => Err(e),
-        },
-        "mv" => match mv(&value[1..]) {
-            Ok(s) => Ok(s),
-            Err(e) => Err(e),
-        },
-
         "exit" => Ok("exit".to_string()),
-        _ => Err("Write a valid Command".to_string()),
+        _ => Err(format!("Command '{}' not found",cmd)),
     }
 }

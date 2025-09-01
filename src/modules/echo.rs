@@ -12,12 +12,12 @@ pub fn echo(args: &[String]) -> Result<String, String> {
     let output = text_args.join(" ");
 
     if no_newline {
-        Ok(output)
+        Ok(format!("{}\n",output))
     } else {
         if output.is_empty() {
             Ok(String::new())
         } else {
-            Ok(output)
+            Ok(format!("{}\n",output))
         }
     }
 }

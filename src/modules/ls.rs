@@ -9,6 +9,10 @@ use {
     std::path::PathBuf,
 };
 
+struct dir_e{
+    name:String,
+    path: PathBuf,
+}
 pub fn ls(arr : &[String]) -> Result<String,String>{
     let mut tag_l = false;
     let mut tag_a = false;
@@ -53,19 +57,36 @@ pub fn ls(arr : &[String]) -> Result<String,String>{
         }
         match fs::read_dir(&var){
             Ok(files) => {
-                let mut entries: Vec<_> = files.filter_map(|e| e.ok()).collect();
+                let mut entries: Vec<dir_e> = files.filter_map(|e| {
+                    e.ok().map(|entry| {
+                        let path = entry.path();
+                        let name = match path.file_name() {
+                            Some(v) => v.to_string_lossy().to_string(),
+                            None => String::new(),
+                        };
+                        dir_e {
+                            name: name,
+                            path: path,
+                        }
+                    })
+                }).collect();
+
                 entries.sort_by(|a, b| {
-                        let a_name = a.file_name().to_string_lossy().trim_matches('.').to_lowercase();
-                        let b_name = b.file_name().to_string_lossy().trim_matches('.').to_lowercase();
+                        let a_name = a.name.trim_matches('.').to_lowercase();
+                        let b_name = b.name.trim_matches('.').to_lowercase();
                         a_name.cmp(&b_name)
                 });
+
+                entries.insert(0, dir_e { name: ".".to_string(), path: PathBuf::from(var) });
+                entries.insert(1, dir_e { name: "..".to_string(), path: PathBuf::from(format!("{}/..",var)) });
+
+                
+                
                 let mut push_result: String = String::new();
                 for read_file in entries{
-                            let path = read_file.path();
-                            let name_file = match path.file_name() {
-                                Some(v) => v.to_string_lossy().to_string(),
-                                None => continue,
-                            };
+                            let path = read_file.path;
+                            let name_file = read_file.name;
+
                             if !tag_a && name_file.starts_with('.'){
                                 continue;
                             };

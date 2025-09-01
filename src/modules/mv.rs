@@ -1,5 +1,5 @@
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 pub fn mv(args: &[String]) -> Result<String, String> {
     if args.len() != 2 {
@@ -13,7 +13,13 @@ pub fn mv(args: &[String]) -> Result<String, String> {
         return Err(format!("mv: cannot stat '{}': No such file or directory", args[0]));
     }
 
-    if let Err(e) = fs::rename(src, dest) {
+    let final_dest: PathBuf = if dest.is_dir() {
+        dest.join(src.file_name().ok_or("mv: invalid source filename")?)
+    } else {
+        dest.to_path_buf()
+    };
+
+    if let Err(e) = fs::rename(src, &final_dest) {
         return Err(format!("mv: failed to move '{}': {}", args[0], e));
     }
 
