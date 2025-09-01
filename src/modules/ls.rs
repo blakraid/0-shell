@@ -9,7 +9,7 @@ use {
     std::path::PathBuf,
 };
 
-struct dir_e{
+struct DirE{
     name:String,
     path: PathBuf,
 }
@@ -57,14 +57,14 @@ pub fn ls(arr : &[String]) -> Result<String,String>{
         }
         match fs::read_dir(&var){
             Ok(files) => {
-                let mut entries: Vec<dir_e> = files.filter_map(|e| {
+                let mut entries: Vec<DirE> = files.filter_map(|e| {
                     e.ok().map(|entry| {
                         let path = entry.path();
                         let name = match path.file_name() {
                             Some(v) => v.to_string_lossy().to_string(),
                             None => String::new(),
                         };
-                        dir_e {
+                        DirE {
                             name: name,
                             path: path,
                         }
@@ -77,14 +77,14 @@ pub fn ls(arr : &[String]) -> Result<String,String>{
                         a_name.cmp(&b_name)
                 });
 
-                entries.insert(0, dir_e { name: ".".to_string(), path: PathBuf::from(var) });
-                entries.insert(1, dir_e { name: "..".to_string(), path: PathBuf::from(format!("{}/..",var)) });
+                entries.insert(0, DirE { name: ".".to_string(), path: PathBuf::from(var) });
+                entries.insert(1, DirE { name: "..".to_string(), path: PathBuf::from(format!("{}/..",var)) });
 
                 
                 
                 let mut push_result: String = String::new();
                 for read_file in entries{
-                            let path = read_file.path;
+                            let path = &read_file.path;
                             let name_file = read_file.name;
 
                             if !tag_a && name_file.starts_with('.'){
@@ -95,20 +95,12 @@ pub fn ls(arr : &[String]) -> Result<String,String>{
                                 Ok(v) => {
                                     let mut name_display = name_file.clone();
                                     number_files+= v.blocks();
-                                    if tag_f {
-                                        if v.is_dir() {
-                                            name_display.push('/');
-                                        } else if v.file_type().is_symlink() {
-                                            name_display.push('@');
-                                        } else if v.permissions().mode() & 0o111 != 0 {
-                                            name_display.push('*');
-                                        }
-                                    };
+                                    
                                     if tag_l {
                                         let mode = v.permissions().mode();
                                     let perms = format!(
                                         "{}{}{}{}{}{}{}{}{}{}",
-                                        if v.is_dir() {"d"} else {"-"},
+                                        if v.is_dir() {"d"} else if v.file_type().is_symlink() {"l"} else {"-"},
                                         if mode & 0o400 != 0 { "r" } else { "-" },
                                         if mode & 0o200 != 0 { "w" } else { "-" },
                                         if mode & 0o100 != 0 { "x" } else { "-" },
@@ -128,6 +120,23 @@ pub fn ls(arr : &[String]) -> Result<String,String>{
                                         let get_git = get_gid_name(gid);
                                         let mtime: DateTime<Local> = DateTime::from(SystemTime::UNIX_EPOCH + std::time::Duration::from_secs(v.mtime() as u64));
                                         let time_str = mtime.format("%b %e %H:%M").to_string();
+
+                                            if v.file_type().is_symlink() {
+                                                if let Ok(target) = fs::read_link(path) {
+                                                    name_display.push_str(" -> ");
+                                                    name_display.push_str(&target.to_string_lossy());
+                                                }
+                                            }
+
+                                            if tag_f {
+                                                if v.is_dir() {
+                                                    name_display.push('/');
+                                                } else if v.file_type().is_symlink() && !tag_l{
+                                                    name_display.push('@');
+                                                } else if v.permissions().mode() & 0o111 != 0 {
+                                                    name_display.push('*');
+                                                }
+                                        };
 
                                         push_result.push_str(&format!(
                                             "{} {:>3} {:>5} {:>5} {:>8} {} {}\n",

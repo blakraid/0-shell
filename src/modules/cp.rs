@@ -59,6 +59,26 @@ fn copy_single_file(source: &str, destination: &str) -> Result<(), String> {
     } else {
         dest_path.to_path_buf()
     };
+    match (source_path.canonicalize(), final_dest.canonicalize()) {
+        (Ok(canonical_source), Ok(canonical_dest)) => {
+            if canonical_source == canonical_dest {
+                return Err(format!(
+                    "cp: '{}' and '{}' are the same file",
+                    source,
+                    final_dest.display()
+                ));
+            }
+        }
+        _ => {
+            if source_path == final_dest {
+                return Err(format!(
+                    "cp: '{}' and '{}' are the same file",
+                    source,
+                    final_dest.display()
+                ));
+            }
+        }
+    }
 
     if let Some(parent) = final_dest.parent() {
         if !parent.exists() {
