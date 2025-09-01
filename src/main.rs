@@ -28,7 +28,7 @@ fn main() {
             if v.as_str() == "exit" {
                 break;
             }else{
-                println!("{}",v)
+                print!("{}",v)
             }
         },
         Err(e) => println!("{}",e),

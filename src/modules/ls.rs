@@ -126,7 +126,7 @@ pub fn ls(arr : &[String]) -> Result<String,String>{
             Err(_) => { return Err(format!("ls: cannot access '{}'", var));}
         }
     }
-    let output = result.join("\n").trim_matches('\n').to_string();
+    let output = format!("{}\n",result.join("\n").trim_matches('\n').to_string());
     Ok(output)
 }
 
