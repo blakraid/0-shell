@@ -15,6 +15,11 @@ fn main() {
 
         let mut input = String::new();
         match io::stdin().read_line(&mut input) {
+            Ok(0) => {
+                
+                println!(); 
+                break;
+            }
             Ok(_) => {}
             Err(e) => {
                 eprintln!("Failed to read line: {}", e);
@@ -29,6 +34,10 @@ fn main() {
 
         let input = input.trim();
 
+        if input.is_empty() {
+            continue;
+        }
+
         let tokens = match tokenizer(input) {
             Ok(tokens) => tokens,
             Err(e) => {
@@ -36,7 +45,7 @@ fn main() {
                 continue;
             }
         };
-
+        // println!("Tokens: {:?}", tokens);
         match prossess(tokens, input) {
             Ok(v) => {
                 if v.as_str() == "exit" {

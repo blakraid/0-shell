@@ -32,7 +32,6 @@ pub fn cp(args: &[String]) -> Result<String, String> {
         Err(errors.join("\n"))
     }
 }
-
 fn copy_single_file(source: &str, destination: &str) -> Result<(), String> {
     let source_path = Path::new(source);
     let dest_path = Path::new(destination);
@@ -59,6 +58,7 @@ fn copy_single_file(source: &str, destination: &str) -> Result<(), String> {
     } else {
         dest_path.to_path_buf()
     };
+
     match (source_path.canonicalize(), final_dest.canonicalize()) {
         (Ok(canonical_source), Ok(canonical_dest)) => {
             if canonical_source == canonical_dest {
@@ -75,18 +75,6 @@ fn copy_single_file(source: &str, destination: &str) -> Result<(), String> {
                     "cp: '{}' and '{}' are the same file",
                     source,
                     final_dest.display()
-                ));
-            }
-        }
-    }
-
-    if let Some(parent) = final_dest.parent() {
-        if !parent.exists() {
-            if let Err(e) = fs::create_dir_all(parent) {
-                return Err(format!(
-                    "cp: cannot create directory '{}': {}",
-                    parent.display(),
-                    e
                 ));
             }
         }

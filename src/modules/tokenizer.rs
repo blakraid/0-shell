@@ -1,4 +1,5 @@
 pub fn tokenizer(cmd : &str) -> Result<Vec<String>,String> {
+    // println!("tokenizer: {}",cmd);
     let mut tokens : Vec<String> = Vec::new();
     let mut string_to_push = String::new();
     let mut is_single = false;
@@ -32,10 +33,10 @@ pub fn tokenizer(cmd : &str) -> Result<Vec<String>,String> {
         return Err("You have problem with escape".to_string());
     }
     if !string_to_push.is_empty(){
-        tokens.push(string_to_push.clone());
+        tokens.push(string_to_push);
     }
-    if tokens.is_empty(){
-        return Err("Write Your Command".to_string());
-    }
+    // if tokens.is_empty(){
+    //     return Err("Write Your Command".to_string());
+    // }
     Ok(tokens)
 }

@@ -1,6 +1,6 @@
 pub fn echo(raw_args: &str) -> Result<String, String> {
     if raw_args.is_empty() {
-        return Ok(String::new());
+        return Ok("\n".to_string());
     }
 
     let (no_newline, content) = if raw_args.starts_with("-n ") {
@@ -35,10 +35,10 @@ fn escape(input: &str) -> String {
                 match next_ch {
                     '\\' => {
                         result.push('\\');
-                        chars.next(); 
+                        chars.next();
                     }
                     _ => {
-                        chars.next(); 
+                        chars.next();
                         result.push(next_ch);
                     }
                 }
