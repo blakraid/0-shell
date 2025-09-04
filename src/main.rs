@@ -27,11 +27,6 @@ fn main() {
             }
         }
 
-        // io::stdout().flush().unwrap();
-
-        // let mut input = String::new();
-        // let _bytes = io::stdin().read_line(&mut input).unwrap();
-
         let input = input.trim();
 
         if input.is_empty() {

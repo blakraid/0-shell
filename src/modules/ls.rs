@@ -148,18 +148,26 @@ pub fn ls(arr : &[String]) -> Result<String,String>{
                                 },
                                 Err(_) => continue
                             };
+                
                 }
-                result.push(format!("total {}\n{}",number_files/2,push_result));
+                if tag_l{
+                    result.push(format!("total {}\n{}",number_files/2,push_result));
+                }else {
+                    result.push(format!("{}",push_result));
+                }
                 number_files = 0;
 
             },
             Err(_) => { return Err(format!("ls: cannot access '{}'", var));}
         }
     }
-    let output = format!("{}\n",result.join("\n").trim_matches('\n').to_string());
+    let  output = if !tag_l{
+        format!("{}\n",result.join(" ").trim_matches('\n').to_string())
+    }else {
+        format!("{}\n",result.join("\n").trim_matches('\n').to_string())
+    };
     Ok(output)
 }
-
 
 
 fn get_uid_name(uid: u32) -> String {

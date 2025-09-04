@@ -24,6 +24,11 @@ pub fn rm(args: &[String]) -> Result<String, String> {
     for path_str in paths {
         let path = Path::new(path_str);
 
+        
+        if path_str == "." || path_str == ".." {
+            return Err(format!("rm: refusing to remove '.' or '..' directory: skipping '.'"));
+        }
+
         if !path.exists() {
             return Err(format!("rm: cannot remove '{}': No such file or directory", path_str));
         }
@@ -36,12 +41,10 @@ pub fn rm(args: &[String]) -> Result<String, String> {
             } else {
                 return Err(format!("rm: cannot remove '{}': Is a directory", path_str));
             }
-        } else {
-            if let Err(e) = fs::remove_file(path) {
-                return Err(format!("rm: failed to remove file '{}': {}", path_str, e));
-            }
+        } else if let Err(e) = fs::remove_file(path) {
+            return Err(format!("rm: failed to remove file '{}': {}", path_str, e));
         }
     }
 
-    Ok("".to_string())
+    Ok(String::new())
 }
