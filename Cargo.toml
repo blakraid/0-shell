@@ -6,3 +6,5 @@ edition = "2024"
 [dependencies]
 chrono = "0.4"
 libc = "0.2"
+xattr = "0.2.2"
+term_size = "0.3"

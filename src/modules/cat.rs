@@ -1,3 +1,4 @@
+use crate::modules::utils::fix_path;
 use std::fs;
 use std::io::{self, Write};
 
@@ -7,10 +8,11 @@ pub fn cat(args: &[String]) -> Result<String, String> {
     }
 
     for file_path in args {
-        if file_path == "-" {
+        if file_path == "-" || file_path == "--" {
             if let Err(_) = input_echo() {}
         } else {
-            match read_and_print_file(file_path) {
+            let fixed_path = fix_path(file_path);
+            match read_and_print_file(&fixed_path) {
                 Ok(_) => {}
                 Err(error_msg) => {
                     eprintln!("{}", error_msg);
@@ -28,7 +30,9 @@ fn input_echo() -> Result<String, String> {
     loop {
         let mut line = String::new();
         match stdin.read_line(&mut line) {
-            Ok(0) => break,
+            Ok(0) => {
+                break;
+            }
             Ok(_) => {
                 print!("{}", line);
                 if let Err(e) = io::stdout().flush() {
@@ -44,9 +48,11 @@ fn input_echo() -> Result<String, String> {
 }
 
 fn read_and_print_file(file_path: &str) -> Result<(), String> {
-    match fs::read_to_string(file_path) {
-        Ok(content) => {
-            print!("{}", content);
+    match fs::read(file_path) {
+        Ok(bytes) => {
+            if let Err(e) = io::stdout().write_all(&bytes) {
+                eprintln!("Error writing to stdout: {}", e);
+            }
             if let Err(e) = io::stdout().flush() {
                 eprintln!("Error flushing stdout: {}", e);
             }

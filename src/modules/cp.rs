@@ -1,5 +1,7 @@
 use std::fs;
-use std::path::Path;
+use std::path::{Path};
+use crate::modules::utils::fix_path;
+
 
 pub fn cp(args: &[String]) -> Result<String, String> {
     if args.len() < 2 {
@@ -7,31 +9,30 @@ pub fn cp(args: &[String]) -> Result<String, String> {
     }
 
     let (sources, destination) = args.split_at(args.len() - 1);
-    let dest = &destination[0];
-    let dest_path = Path::new(dest);
+    let dest = fix_path(&destination[0]);
+    let dest_path = Path::new(&dest);
 
     if sources.len() > 1 && !dest_path.is_dir() {
         return Err(format!("cp: target '{}' is not a directory", dest));
     }
 
     let mut errors = Vec::new();
-    let mut success_count = 0;
 
     for source in sources {
-        match copy_single_file(source, dest) {
-            Ok(_) => success_count += 1,
+        let fixed_source = fix_path(source);
+        match copy_single_file(&fixed_source, &dest) {
+            Ok(_) => {}
             Err(error_msg) => errors.push(error_msg),
         }
     }
 
     if errors.is_empty() {
         Ok(String::new())
-    } else if success_count > 0 {
-        Err(errors.join("\n"))
     } else {
         Err(errors.join("\n"))
     }
 }
+
 fn copy_single_file(source: &str, destination: &str) -> Result<(), String> {
     let source_path = Path::new(source);
     let dest_path = Path::new(destination);
@@ -45,7 +46,7 @@ fn copy_single_file(source: &str, destination: &str) -> Result<(), String> {
 
     if source_path.is_dir() {
         return Err(format!(
-            "cp: -r not specified; omitting directory '{}'",
+            "cp: not specified; omitting directory '{}'",
             source
         ));
     }
